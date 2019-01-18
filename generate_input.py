@@ -162,14 +162,14 @@ def ERR(g_list, R_func=lambda g, max_g: float(2**g- 1) / 2**max_g):
     ----------
     g_list : array_like
         Array of relevance grades.
-    R_func : function(g, max_g)
+    R_func : function(int, int) -> float
         Function that converts a relevance grade
         to probability of relevance.
     
     Returns
     -------
     ERR : float
-        Expected Reciprocal Rank
+        Expected Reciprocal Rank.
     """
     p = 1
     ERR = 0
