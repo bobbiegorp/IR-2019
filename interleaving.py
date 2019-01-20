@@ -1,10 +1,25 @@
 import numpy as np
 
 
-def td_interleaving(ranking_pair):
+def td_interleaving(ranking_pair,max_interleav=3):
+    """Run Team-draft interleaving given a ranking pair as input
 
+    Parameters
+    ----------
+    An ranking pair : List of ranked and labeled results
+        Index of list elements represents the rank of that element. Each
+        element is a tuple of the relevance score and a duplicate ID.
+        If this value is 0, it has no duplicate with a document in the results of other ranker.
+        If the value is greater than 0, then it has a duplicate with another result of the other ranker that matches this number
+        No duplicate example: E ranked list:  [(0,0),(0,0),(0,0)] and P ranked list: [(1,0),(0,0),(0,0)] form
+        2 duplicates example: E ranked list: [(1,1),(0,2),(0,0)]  and P ranked list: [(1,0),(1,1),(0,2)]  for example
+    Returns
+    -------
+    Interleaved list (of length 3 as default) based on Team-draft method: list
+        Index + 1 represents the rank of the interleaved list and element is an tuple of the form (relevance: binary,ranker credit:binary), Credits are assigned as P(0) and E(1)
+    """
     ranking_p = ranking_pair[0] #[(0,0),(0,0),(0,0)] form or duplicate [(0,1),(0,0),(0,0)]
-    ranking_e = ranking_pair[1] #[(0,0),(0,0),(0,0)] form or duplicate #[(0,1),(0,0),(0,0)]
+    ranking_e = ranking_pair[1]
     interleaved = []
 
     p_team = 0 #Amount results assigned from p
@@ -15,7 +30,7 @@ def td_interleaving(ranking_pair):
     limit = len(ranking_p)
 
     #while p_pointer < limit and e_pointer < limit:
-    while len(interleaved) < 3:
+    while len(interleaved) < max_interleav:
 
         p_priority = np.random.choice(2, 1)[0]
         new_result = False
@@ -63,7 +78,21 @@ def td_interleaving(ranking_pair):
     return interleaved
 
 def get_softmax(ranking_indices,tau=3):
-    #ranking_indices as input as then it can be renomarlized if certain document are already picked
+    """Compute softmax distribution for a ranker given the indices of documents that are avaliable to be picked.
+
+    Parameters
+    ----------
+    Ranking indices : List of indices that represent the rank of documents that can be picked for next interleaving.
+    Example of nothing picked of ranker: List of the form: [0,1,2]
+    Example of document already picked of ranker: List of the form: [0,2]
+
+    Returns
+    -------
+    List of softmax probabilities for documents to be picked: List
+        The list maps one to one the ranking indices that were given as input, each element is a probability for the document for that particular index
+        in that ranking indices list, which in turn consist of numbers that represents the actual indices to be picked from ranked results.
+
+    """
 
     numerator_list = [] #Numerator values for each of the ranked results
     softmax_distribution = []
@@ -81,7 +110,23 @@ def get_softmax(ranking_indices,tau=3):
 
     return softmax_distribution
 
-def prob_interleaving(ranking_pair):
+def prob_interleaving(ranking_pair,max_interleav=3):
+    """Run Probabilistic interleaving  given a ranking pair as input
+
+    Parameters
+    ----------
+    An ranking pair : List of ranked and labeled results
+        Index of list elements represents the rank of that element. Each
+        element is a tuple of the relevance score and a duplicate ID.
+        If this value is 0, it has no duplicate with a document in the results of other ranker.
+        If the value is greater than 0, then it has a duplicate with another result of the other ranker that matches this number
+        No duplicate example: E ranked list:  [(0,0),(0,0),(0,0)] and P ranked list: [(1,0),(0,0),(0,0)] form
+        2 duplicates example: E ranked list: [(1,1),(0,2),(0,0)]  and P ranked list: [(1,0),(1,1),(0,2)]  for example
+    Returns
+    -------
+    Interleaved list (of length 3 as default) based on probabilistc interleaving method: list
+        Index + 1 represents the rank of the interleaved list and element is an tuple of the form (relevance: binary,ranker credit:binary), credits are assigned as P(0) and E(1)
+    """
 
     ranking_p = ranking_pair[0] #[(0,0),(0,0),(0,0)] form or duplicate [(0,1),(0,0),(0,0)]
     ranking_e = ranking_pair[1] #[(0,0),(0,0),(0,0)] form or duplicate #[(0,1),(0,0),(0,0)]
@@ -94,7 +139,7 @@ def prob_interleaving(ranking_pair):
     found_duplicates = []
 
     #while len(p_indices) > 0 or len(e_indices) > 0:
-    while len(interleaved) < 3:
+    while len(interleaved) < max_interleav:
 
         p_priority = np.random.choice(2, 1)[0]
 
