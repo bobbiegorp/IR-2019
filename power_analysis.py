@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import generate_input
+import generate_input,interleaving
 
 import random
 
@@ -73,7 +73,7 @@ def interleaving_simulation(pair, k, interleaving_func, click_model):
     """
     wins = [0] * len(pair)
     for _ in range(k):
-        search_results = tmp_interleaving(pair)
+        search_results = interleaving_func(pair)
         wins[click_model(search_results)] += 1
     p = wins[1] / float(wins[0] + wins[1])
     return p
@@ -163,9 +163,12 @@ def main():
         dERR = generate_input.ERR(pair[1]) - generate_input.ERR(pair[0])
         if dERR >= 0.05 and dERR <= 0.95:
             # Assumes no duplicates for now.
-            p = interleaving_simulation(
-                pair, 100, tmp_interleaving, tmp_click_model)
-            bins[int(dERR * 10)].append(compute_sample_size(p))
+            #p = interleaving_simulation(
+                #pair, 100, tmp_interleaving, tmp_click_model)
+            for permutation in generate_input.add_conflicts(pair): # Assumes (non-) duplicates for now.
+                p = interleaving_simulation(
+                    permutation, 100, interleaving.td_interleaving, tmp_click_model)
+                bins[int(dERR * 10)].append(compute_sample_size(p))
     process_bins(bins)
     return
 
