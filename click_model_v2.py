@@ -21,8 +21,6 @@ def read_yandex(path, n=-1):
                 item['r_id'] = int(data[4])
                 item['urls'] = [int(x) for x in data[5:]]
             out.append(item)
-#            if item['id'] < 5:
-#                print(l.strip())
     return out
 
 
@@ -57,25 +55,16 @@ class PBM:
     def __init__(self, epsilon=0.1):
         self.epsilon = epsilon
         self.gammas = []
-#        self.gammas = [(i+1) / 10.0 for i in range(10)]
-        self.epsilon = 1 - self.epsilon
     
     def update_item(self, item, gamma_sum, prev_q, clicks):
         if item['a'] == 'q':
             while len(self.gammas) < len(prev_q['urls']):
-                self.gammas.append(random() * 0.01)
+                self.gammas.append(random())
                 gamma_sum.append(0)
             for r, _id in enumerate(prev_q['urls']):
-#                if r == 0:
-#                    print('   ', r, _id)
                 if _id in clicks:
                     gamma_sum[r] += 1
-#                    if r == 0:
-#                        print('>>>', 1)
                 else:
-#                    if r == 0:
-#                        print('>>>', self.gammas[r] * self.epsilon \
-#                            / (1 - self.gammas[r] * (1 - self.epsilon)))
                     gamma_sum[r] += self.gammas[r] * self.epsilon \
                         / (1 - self.gammas[r] * (1 - self.epsilon))
             prev_q = item
@@ -115,23 +104,17 @@ class PBM:
         n_sessions = 0
         n_queries = 0
         for item in database:
-#            if item['id'] >= 4:
-#                break
             if session_id != item['id']:
-#                print(session_id)
                 gamma_sum, n_queries = self.update_session(session, gamma_sum, n_queries)
                 session_id = item['id']
                 session = []
                 n_sessions += 1
             session.append(item)
-#        print(session_id)
         gamma_sum, n_queries = self.update_session(session, gamma_sum, n_queries)
         
-        self.gammas = []
-        for x in gamma_sum:
-#            print(x, n_queries)
+        for r, gamma_sum_r in enumerate(gamma_sum):
 #            self.gammas.append(x / float(n_queries))
-            self.gammas.append(x / float(n_sessions))
+            self.gammas[r] = gamma_sum_r / float(n_sessions)
         
         print(self.gammas)
         
@@ -147,8 +130,7 @@ class PBM:
 def main():
     database = read_yandex('./YandexRelPredChallenge.txt')
     cm = PBM()
-#    print(cm.gammas)
-    for _ in range(100):
+    for _ in range(10):
         cm.learn(database)
     search_results = [0 for _ in range(20)]
     counter = [0 for _ in range(len(search_results))]
