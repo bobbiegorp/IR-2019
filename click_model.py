@@ -60,7 +60,7 @@ class PBM:
             
         probabilities = []
         for i in range(len(interleaved_list)):
-            if interleaved_list[i][1] == 1:
+            if interleaved_list[i][0] == 1:
                 attractiveness = 1-self.epsilon
             else: attractiveness = self.epsilon
             
