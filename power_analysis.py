@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
-import generate_input,interleaving
+import generate_input
+import interleaving
+import click_model as cm
 
 import random
 
 from scipy import stats, sqrt
 from math import ceil
+
 
 
 def tmp_interleaving(pair):
@@ -74,7 +77,10 @@ def interleaving_simulation(pair, k, interleaving_func, click_model):
     wins = [0] * len(pair)
     for _ in range(k):
         search_results = interleaving_func(pair)
-        wins[click_model(search_results)] += 1
+        relevance = get_relevance(search_results)
+        clicked = click_model(relevance)
+        get_winner = winner(search_results,clicked)
+        wins[winner] += 1
     p = wins[1] / float(wins[0] + wins[1])
     return p
 
@@ -158,17 +164,36 @@ def process_bins(bins):
 
 def main():
     inputs = generate_input.gen_input_pairs(3, 2)
-    bins = [[] for _ in range(10)]
+    #Click model train
+
+    bins_prob_random = [[] for _ in range(10)]
+    bins_prob_pbm = [[] for _ in range(10)]
+    bins_td_random = [[] for _ in range(10)]
+    bins_td_pbm = [[] for _ in range(10)]
+    bins = [bins_prob_random, bins_prob_pbm, bins_td_random, bins_td_pbm]
+    length_interleaving = 3
+
+    rcm = cm.RCM()
+    pbm = cm.PBM()
+    database = cm.read_yandex("./YandexRelPredChallenge.txt")
+    rcm.learn(database)
+    pbm.learn(database,3,5,length_interleaving)
+
+    click_model_functions = [rcm.get_clicks,pbm.get_clicks]
+    interleaving_functions = [interleaving.td_interleaving, interleaving.prob_interleaving]
+
     for pair in inputs:
         dERR = generate_input.ERR(pair[1]) - generate_input.ERR(pair[0])
         if dERR >= 0.05 and dERR <= 0.95:
-            # Assumes no duplicates for now.
-            #p = interleaving_simulation(
-                #pair, 100, tmp_interleaving, tmp_click_model)
+
             for permutation in generate_input.add_conflicts(pair): # Assumes (non-) duplicates for now.
-                p = interleaving_simulation(
-                    permutation, 100, interleaving.td_interleaving, tmp_click_model)
-                bins[int(dERR * 10)].append(compute_sample_size(p))
+
+                for i,click_model in enumerate(click_model_functions):
+                    for j,interleaving in enumerate(interleaving_functions):
+                        p = interleaving_simulation(
+                            permutation, 100, interleaving,click_model)
+                        bins[i*len(interleaving_functions)+j][int(dERR * 10)].append(compute_sample_size(p))
+
     process_bins(bins)
     return
 
