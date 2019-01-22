@@ -180,36 +180,40 @@ def prob_interleaving(ranking_pair,max_interleav=3):
 
     return interleaved
 
-pair = [[(0,1),(0,2),(0,3),(0,4)],[(0,2),(0,3),(0,4),(0,1)]]
-print(pair[0],"\n")
-print(pair[1],"\n")
-for i in range(5):
-    interleav = td_interleaving(pair)
-    print("Teamdraft: ", interleav)
+def main():
+    pair = [[(0,1),(0,2),(0,3),(0,4)],[(0,2),(0,3),(0,4),(0,1)]]
+    print(pair[0],"\n")
+    print(pair[1],"\n")
+    for i in range(5):
+        interleav = td_interleaving(pair)
+        print("Teamdraft: ", interleav)
 
-for i in range(5):
-    interleav = prob_interleaving(pair)
-    print("Probabilistic:",interleav)
+    for i in range(5):
+        interleav = prob_interleaving(pair)
+        print("Probabilistic:",interleav)
 
-print("---------------------Softmax ------------\n")
-softmax = get_softmax(list(range(3)))
-print(softmax)
+    print("---------------------Softmax ------------\n")
+    softmax = get_softmax(list(range(3)))
+    print(softmax)
 
-print("---------------------New Pair ------------\n")
-pair = [[(0,1),(1,2),(0,3)],[(1,2),(0,1),(0,3)]]
-print(pair[0],"\n")
-print(pair[1],"\n")
+    print("---------------------New Pair ------------\n")
+    pair = [[(0,1),(1,2),(0,3)],[(1,2),(0,1),(0,3)]]
+    print(pair[0],"\n")
+    print(pair[1],"\n")
 
-for i in range(5):
-    interleav = prob_interleaving(pair)
-    print("Probabilistic:",interleav)
+    for i in range(5):
+        interleav = prob_interleaving(pair)
+        print("Probabilistic:",interleav)
 
-print("---------------------New Pair ------------\n")
+    print("---------------------New Pair ------------\n")
 
-pair = [[(0,0),(1,0),(0,0)],[(1,0),(0,0),(0,0)]]
-print(pair[0],"\n")
-print(pair[1],"\n")
+    pair = [[(0,0),(1,0),(0,0)],[(1,0),(0,0),(0,0)]]
+    print(pair[0],"\n")
+    print(pair[1],"\n")
 
-for i in range(5):
-    interleav = prob_interleaving(pair)
-    print("Probabilistic:",interleav)
+    for i in range(5):
+        interleav = prob_interleaving(pair)
+        print("Probabilistic:",interleav)
+
+if __name__ == '__main__':
+    main()
