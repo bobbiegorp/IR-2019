@@ -77,7 +77,7 @@ def td_interleaving(ranking_pair,max_interleav=3):
 
     return interleaved
 
-def get_softmax(ranking_indices,tau=3):
+def get_softmax(ranking_indices,tau):
     """Compute softmax distribution for a ranker given the indices of documents that are avaliable to be picked.
 
     Parameters
@@ -110,7 +110,7 @@ def get_softmax(ranking_indices,tau=3):
 
     return softmax_distribution
 
-def prob_interleaving(ranking_pair,max_interleav=3):
+def prob_interleaving(ranking_pair,max_interleav=3,tau=3):
     """Run Probabilistic interleaving  given a ranking pair as input
 
     Parameters
@@ -144,7 +144,7 @@ def prob_interleaving(ranking_pair,max_interleav=3):
         p_priority = np.random.choice(2, 1)[0]
 
         if (p_priority and len(p_indices) > 0) or len(e_indices) == 0:
-            softmax_p = get_softmax(p_indices)
+            softmax_p = get_softmax(p_indices,tau)
             doc_index_p = np.random.choice(p_indices, 1, p=softmax_p)[0]
             p_indices.remove(doc_index_p)
 
@@ -161,7 +161,7 @@ def prob_interleaving(ranking_pair,max_interleav=3):
                 duplicate_index = ranking_e.index(result_p)
                 e_indices.remove(duplicate_index)
         else:
-            softmax_e = get_softmax(e_indices)
+            softmax_e = get_softmax(e_indices,tau)
             doc_index_e = np.random.choice(e_indices, 1, p=softmax_e)[0]
             e_indices.remove(doc_index_e)
 
@@ -193,7 +193,7 @@ def main():
         print("Probabilistic:",interleav)
 
     print("---------------------Softmax ------------\n")
-    softmax = get_softmax(list(range(3)))
+    softmax = get_softmax(list(range(3)),3)
     print(softmax)
 
     print("---------------------New Pair ------------\n")

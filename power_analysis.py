@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import generate_input
-
 import random
 
 from scipy import stats, sqrt
@@ -53,9 +52,9 @@ def tmp_click_model(search_results):
     return out
 
 
-def interleaving_simulation(pair, k, interleaving_func, click_model):
+def interleaving_simulation(pair, k, interleaving_func, click_model_func, length_interleaving=3):
     """Simulates user interaction on interleaved search results.
-    
+
     Parameters
     ----------
     pair : tuple
@@ -66,7 +65,7 @@ def interleaving_simulation(pair, k, interleaving_func, click_model):
         Function to interleave the two lists of ranking combinations.
     click_model : function(array_like) -> int
         Function to simulate user click.
-    
+
     Returns
     -------
     p : float
@@ -74,15 +73,30 @@ def interleaving_simulation(pair, k, interleaving_func, click_model):
     """
     wins = [0] * len(pair)
     for _ in range(k):
-        search_results = interleaving_func(pair)
-        indices = click_model(search_results)
-        win_sum = sum([search_results[i][0] for i in indices])
-        win_index = 1 if float(win_sum) / len(indices) > 0.5 else 0
-        wins[win_index] += 1
-#        relevance = get_relevance(search_results)
-#        clicked = click_model(relevance)
-#        get_winner = winner(search_results,clicked)
-#        wins[winner] += 1
+        search_results = interleaving_func(pair, length_interleaving)  # Create interleaved list
+
+        relevance_grades = []  # Get relevance label of documents that were in the interleavedl ist
+        for relevance, assignment in search_results:
+            relevance_grades.append(relevance)
+
+        clicked = click_model_func(relevance_grades)  # Get clicked documents indices from interleaved list
+        counter_E_click = 0
+        counter_P_click = 0
+        for click in clicked:  # Determine who got most clicks
+            assignment = search_results[click][1]
+            if assignment == 1:
+                counter_E_click += 1
+            else:
+                counter_P_click += 1
+
+        if counter_E_click == counter_P_click:
+            continue
+        elif counter_E_click > (length_interleaving / 2):
+            winner = 1
+        else:
+            winner = 0
+
+        wins[winner] += 1
     p = wins[1] / float(wins[0] + wins[1])
     return p
 
