@@ -19,7 +19,6 @@ def main():
     database = cm.read_yandex("./YandexRelPredChallenge.txt")
     rcm.learn(database)
     pbm.learn(database, 3, 5, length_interleaving)
-#    pbm.gammas = [0.99,0.48,0.22]
     print('LOG :: DONE TRAINING')
 
     n_simulations = 500
@@ -27,8 +26,8 @@ def main():
     interleaving_fs = [il.td_interleaving, il.prob_interleaving]
     bin_set_labels = [
         'RCM & Team-Draft Interleaving',
-        'PBM & Team-Draft Interleaving',
         'RCM & Probabilistic Interleaving',
+        'PBM & Team-Draft Interleaving',
         'PBM & Probabilistic Interleaving'
     ]
 
@@ -75,8 +74,6 @@ def main():
         bin_sets.append(bin_info)
 
     pa.plot_bin_info(bin_sets, bin_set_labels, bin_labels)
-#    for bin_set, bin_set_label in zip (bin_sets, bin_set_labels):
-#        pa.plot_bin_info([bin_set], [bin_set_label], bin_labels)
 
     return
 
