@@ -96,7 +96,7 @@ def interleaving_simulation(pair, k, interleaving_func, click_model_func, length
         if n_E_click == n_P_click:
             wins[0] += 1
             wins[1] += 1
-        if n_E_click > n_P_click:
+        elif n_E_click > n_P_click:
             wins[1] += 1
         else:
             wins[0] += 1

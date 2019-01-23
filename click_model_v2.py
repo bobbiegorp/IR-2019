@@ -54,13 +54,15 @@ class RCM:
         """
         self.rho = random()
     
-    def learn(self, database):
+    def learn(self, database, n=-1):
         """Learns class parameters.
         
         Parameters
         ----------
         database : array_like
             Array of dictionaries representing database items.
+        n : int
+            Maximum rank at which parameters are learned.
         
         Returns
         -------
@@ -69,7 +71,10 @@ class RCM:
         n_clicks, n_docs = 0, 0
         for item in database:
             if item['a'] == 'q':
-                n_docs += len(item['urls'])
+                if n < 0:
+                    n_docs += len(item['urls'])
+                else:
+                    n_docs += len(item['urls'][:n])
             else:
                 n_clicks += 1
         self.rho = n_clicks / float(n_docs)
@@ -162,7 +167,7 @@ class PBM:
             A list of documents ids, returned by the last query,
             that the user clicked on.
         n : int
-            Maximum rank for which parameters are learned.
+            Maximum rank at which parameters are learned.
         
         Returns
         -------
@@ -224,7 +229,7 @@ class PBM:
         database : array_like
             Array of dictionaries representing database items.
         n : int
-            Maximum rank for which parameters are learned.
+            Maximum rank at which parameters are learned.
         
         Returns
         -------
@@ -278,7 +283,7 @@ class PBM:
             Number of consecutive database iterations for which
             convergence is checked.
         n_rank : int
-            Maximum rank for which parameters are learned.
+            Maximum rank at which parameters are learned.
         
         Returns
         -------
