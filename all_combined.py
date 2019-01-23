@@ -17,7 +17,7 @@ def main():
     rcm = cm.RCM()
     pbm = cm.PBM()
     database = cm.read_yandex("./YandexRelPredChallenge.txt")
-    rcm.learn(database)
+    rcm.learn(database, length_interleaving)
     pbm.learn(database, 3, 5, length_interleaving)
     print('LOG :: DONE TRAINING')
 
