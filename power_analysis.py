@@ -8,7 +8,7 @@ from math import ceil
 
 import matplotlib.pyplot as plt
 
-def tmp_interleaving(pair):
+def tmp_interleaving(pair, length=-1):
     """Temporary interleaving function for simulation test.
     
     Parameters
@@ -22,14 +22,16 @@ def tmp_interleaving(pair):
         A list of interleaved ranking combinations.
     """
     out = []
+    if length < 0:
+        length = sum([len(p) for p in pair])
     for item0, item1 in zip(pair[0], pair[1]):
         if random.random() < 0.5:
-            out.append((0, item0))
-            out.append((1, item1))
+            out.append((item0, 0))
+            out.append((item1, 1))
         else:
-            out.append((1, item1))
-            out.append((0, item0))
-    return out
+            out.append((item1, 1))
+            out.append((item0, 0))
+    return out[:length]
 
 def tmp_click_model(search_results):
     """Temporary click model function for simulation test.
@@ -48,12 +50,11 @@ def tmp_click_model(search_results):
     index = len(search_results)
     while index >= len(search_results):
         index = int(abs(random.gauss(0, 1) / 2 * len(search_results)))
-    clicked_id = search_results[index][0]
-    out = [clicked_id]
+    out = [index]
     return out
 
 
-def interleaving_simulation(pair, k, interleaving_func, click_model_func, length_interleaving=3):
+def interleaving_simulation(pair, k, interleaving_func, click_model_func, length_interleaving=-1):
     """Simulates user interaction on interleaved search results.
 
     Parameters
@@ -74,30 +75,32 @@ def interleaving_simulation(pair, k, interleaving_func, click_model_func, length
     """
     wins = [0] * len(pair)
     for _ in range(k):
-        search_results = interleaving_func(pair, length_interleaving)  # Create interleaved list
-
-        relevance_grades = []  # Get relevance label of documents that were in the interleavedl ist
+        # Create interleaved list
+        search_results = interleaving_func(pair, length_interleaving)
+        # Get relevance label of documents in interleaved list
+        relevance_grades = []
         for relevance, assignment in search_results:
             relevance_grades.append(relevance)
-
-        clicked = click_model_func(relevance_grades)  # Get clicked documents indices from interleaved list
-        counter_E_click = 0
-        counter_P_click = 0
-        for click in clicked:  # Determine who got most clicks
+        # Get clicked documents indices from interleaved list
+        clicked = click_model_func(relevance_grades)
+        n_E_click = 0
+        n_P_click = 0
+        # Determine who got most clicks
+        for click in clicked:
             assignment = search_results[click][1]
             if assignment == 1:
-                counter_E_click += 1
+                n_E_click += 1
             else:
-                counter_P_click += 1
+                n_P_click += 1
 
-        if counter_E_click == counter_P_click:
-            continue
-        elif counter_E_click > (length_interleaving / 2):
-            winner = 1
+        if n_E_click == n_P_click:
+            wins[0] += 1
+            wins[1] += 1
+        if n_E_click > n_P_click:
+            wins[1] += 1
         else:
-            winner = 0
+            wins[0] += 1
 
-        wins[winner] += 1
     p = wins[1] / float(wins[0] + wins[1])
     return p
 
@@ -275,7 +278,7 @@ def main():
     n_bins = 10
     cut_sides = 0.05
     inputs = generate_input.gen_input_pairs(3, 2)
-    bins = [[[] for _ in range(n_bins)] for _ in range(4)]
+    bins = [[[] for _ in range(n_bins)] for _ in range(2)]
     # Obtain data through simulations.
     for pair in inputs:
         dERR = generate_input.ERR(pair[1]) - generate_input.ERR(pair[0])
