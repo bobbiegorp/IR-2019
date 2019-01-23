@@ -19,9 +19,10 @@ def main():
     database = cm.read_yandex("./YandexRelPredChallenge.txt")
     rcm.learn(database)
     pbm.learn(database, 3, 5, length_interleaving)
+#    pbm.gammas = [0.99,0.48,0.22]
     print('LOG :: DONE TRAINING')
 
-    n_simulations = 1000
+    n_simulations = 500
     click_model_fs = [rcm.get_clicks, pbm.get_clicks]
     interleaving_fs = [il.td_interleaving, il.prob_interleaving]
     bin_set_labels = [
@@ -55,15 +56,14 @@ def main():
 
                     for k, permutation in enumerate(permutations):
 
-                        print('  LOG :: ' + str(k + 1) + ' / '
+                        print('    LOG :: ' + str(k + 1) + ' / '
                             + str(len(permutations)) + ' PERMUTATIONS')
 
                         p = pa.interleaving_simulation(
                             permutation, n_simulations,
                             interleaving_f, click_model_f,
                             length_interleaving)
-                        bins[ij][
-                            int(dERR * 10)].append(
+                        bins[ij][int(dERR * 10)].append(
                             pa.compute_sample_size(p))
 
     bin_sets = []
@@ -73,10 +73,11 @@ def main():
         bin_info = pa.process_bins(bin_set)
         pa.print_bin_info(bin_info)
         bin_sets.append(bin_info)
-    pa.plot_bin_info(bin_sets[::2], bin_set_labels[::2],
-        bin_labels[::2])
-    pa.plot_bin_info(bin_sets[1::2], bin_set_labels[1::2],
-        bin_labels[1::2])
+
+    pa.plot_bin_info(bin_sets, bin_set_labels, bin_labels)
+#    for bin_set, bin_set_label in zip (bin_sets, bin_set_labels):
+#        pa.plot_bin_info([bin_set], [bin_set_label], bin_labels)
+
     return
 
 if __name__ == '__main__':

@@ -74,32 +74,33 @@ def interleaving_simulation(pair, k, interleaving_func, click_model_func, length
         Proportion of wins of second ranking combination in pair.
     """
     wins = [0] * len(pair)
-    for _ in range(k):
-        # Create interleaved list
-        search_results = interleaving_func(pair, length_interleaving)
-        # Get relevance label of documents in interleaved list
-        relevance_grades = []
-        for relevance, assignment in search_results:
-            relevance_grades.append(relevance)
-        # Get clicked documents indices from interleaved list
-        clicked = click_model_func(relevance_grades)
-        n_E_click = 0
-        n_P_click = 0
-        # Determine who got most clicks
-        for click in clicked:
-            assignment = search_results[click][1]
-            if assignment == 1:
-                n_E_click += 1
-            else:
-                n_P_click += 1
+    while sum(wins) == 0:
+        for _ in range(k):
+            # Create interleaved list
+            search_results = interleaving_func(pair,
+                length_interleaving)
+            # Get relevance label of documents in interleaved list
+            relevance_grades = []
+            for relevance, assignment in search_results:
+                relevance_grades.append(relevance)
+            # Get clicked documents indices from interleaved list
+            clicked = click_model_func(relevance_grades)
+            n_E_click = 0
+            n_P_click = 0
+            # Determine who got most clicks
+            for click in clicked:
+                assignment = search_results[click][1]
+                if assignment == 1:
+                    n_E_click += 1
+                else:
+                    n_P_click += 1
 
-        if n_E_click == n_P_click:
-            wins[0] += 1
-            wins[1] += 1
-        elif n_E_click > n_P_click:
-            wins[1] += 1
-        else:
-            wins[0] += 1
+            if n_E_click == n_P_click:
+                continue
+            elif n_E_click > n_P_click:
+                wins[1] += 1
+            else:
+                wins[0] += 1
 
     p = wins[1] / float(wins[0] + wins[1])
     return p
